@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mac & iOS Shortcuts Trainer</title>
+<style>
+  :root {
+    --bg: #1a1a2e;
+    --surface: #16213e;
+    --card: #0f3460;
+    --accent: #e94560;
+    --accent2: #2aa8d8;
+    --green: #2ecc71;
+    --red: #e74c3c;
+    --yellow: #f1c40f;
+    --text: #f0f0ff;
+    --text-dim: #b8b8d8;
+    --border: #3a3a5a;
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+  }
+
+  h1 { font-size: 2rem; font-weight: 700; letter-spacing: -0.5px; }
+  h2 { font-size: 1.4rem; font-weight: 600; }
+
+  .screen { display: none; width: 100%; max-width: 720px; animation: fadeIn 0.25s ease; }
+  .screen.active { display: block; }
+  @keyframes fadeIn { from { opacity:0; transform: translateY(8px); } to { opacity:1; transform: translateY(0); } }
+
+  /* ── HOME ── */
+  .home-header {
+    text-align: center;
+    padding: 40px 0 30px;
+  }
+  .home-header .emoji { font-size: 3rem; display: block; margin-bottom: 10px; }
+  .home-header p { color: var(--text-dim); margin-top: 8px; font-size: 0.95rem; }
+
+  .menu-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-top: 28px;
+  }
+  .menu-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px 18px;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.18s;
+    color: var(--text);
+  }
+  .menu-btn:hover { background: var(--card); border-color: var(--accent2); transform: translateY(-2px); }
+  .menu-btn .icon { font-size: 1.8rem; margin-bottom: 8px; display: block; }
+  .menu-btn .label { font-size: 1rem; font-weight: 600; display: block; }
+  .menu-btn .sub { font-size: 0.8rem; color: var(--text-dim); margin-top: 4px; display: block; }
+  .menu-btn.danger { border-color: #3a2020; }
+  .menu-btn.danger:hover { background: #2a1010; border-color: var(--red); }
+  .menu-btn.full { grid-column: 1 / -1; }
+
+  /* ── STATS STRIP ── */
+  .stats-strip {
+    display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;
+    margin-top: 24px; padding: 16px;
+    background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border);
+  }
+  .stat-item { text-align: center; }
+  .stat-item .val { font-size: 1.5rem; font-weight: 700; color: var(--accent2); }
+  .stat-item .key { font-size: 0.72rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+
+  /* ── DRILL / QUIZ ── */
+  .drill-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 16px 0; border-bottom: 1px solid var(--border); margin-bottom: 24px;
+  }
+  .progress-bar-wrap { width: 100%; height: 6px; background: var(--border); border-radius: 3px; margin-top: 10px; }
+  .progress-bar { height: 6px; background: var(--accent2); border-radius: 3px; transition: width 0.3s; }
+
+  .question-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 28px; margin-bottom: 20px; text-align: center;
+  }
+  .question-tag {
+    display: inline-block; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1px;
+    color: var(--text-dim); background: var(--border); padding: 3px 10px; border-radius: 20px; margin-bottom: 14px;
+  }
+  .question-text { font-size: 1.15rem; line-height: 1.5; }
+  .kbd-display {
+    display: inline-block; background: var(--card); border: 1px solid var(--accent2);
+    border-radius: 8px; padding: 10px 20px; font-size: 1.3rem; font-weight: 600;
+    font-family: 'SF Mono', 'Fira Code', monospace; margin-top: 10px; letter-spacing: 0.5px;
+    color: var(--accent2);
+  }
+
+  .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .option-btn {
+    background: var(--surface); border: 2px solid var(--border);
+    border-radius: var(--radius); padding: 14px 16px; cursor: pointer;
+    text-align: left; font-size: 0.92rem; color: var(--text);
+    transition: all 0.15s; font-family: inherit; line-height: 1.4;
+  }
+  .option-btn:hover:not(:disabled) { border-color: var(--accent2); background: var(--card); }
+  .option-btn.correct { border-color: var(--green) !important; background: rgba(46,204,113,0.15) !important; }
+  .option-btn.wrong { border-color: var(--red) !important; background: rgba(231,76,60,0.15) !important; }
+  .option-btn.reveal { border-color: var(--green) !important; background: rgba(46,204,113,0.08) !important; }
+  .option-btn:disabled { cursor: default; }
+
+  .kbd-option {
+    font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.88rem;
+    background: rgba(15,126,168,0.12); padding: 2px 6px; border-radius: 4px;
+    display: inline-block; margin-bottom: 2px;
+  }
+
+  .feedback-bar {
+    padding: 14px 18px; border-radius: var(--radius); margin: 16px 0;
+    display: none; align-items: center; gap: 12px; font-size: 0.95rem;
+  }
+  .feedback-bar.show { display: flex; }
+  .feedback-bar.correct { background: rgba(46,204,113,0.15); border: 1px solid var(--green); }
+  .feedback-bar.wrong { background: rgba(231,76,60,0.15); border: 1px solid var(--red); }
+  .feedback-icon { font-size: 1.4rem; }
+
+  .next-btn {
+    width: 100%; padding: 14px; background: var(--accent2); border: none;
+    border-radius: var(--radius); color: #fff; font-size: 1rem; font-weight: 600;
+    cursor: pointer; transition: opacity 0.15s; font-family: inherit;
+    display: none;
+  }
+  .next-btn.show { display: block; }
+  .next-btn:hover { opacity: 0.85; }
+
+  .back-btn {
+    background: transparent; border: 1px solid var(--border); color: var(--text-dim);
+    padding: 8px 16px; border-radius: 8px; cursor: pointer; font-family: inherit;
+    font-size: 0.88rem; transition: all 0.15s;
+  }
+  .back-btn:hover { border-color: var(--text-dim); color: var(--text); }
+
+  /* ── RESULTS ── */
+  .results-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 32px; text-align: center;
+  }
+  .results-score { font-size: 4rem; font-weight: 800; color: var(--accent2); }
+  .results-label { color: var(--text-dim); margin-top: 4px; font-size: 0.9rem; }
+  .grade { font-size: 2rem; margin: 16px 0; }
+  .results-breakdown { margin-top: 24px; text-align: left; }
+  .breakdown-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+  .breakdown-item:last-child { border: none; }
+  .breakdown-badge { padding: 2px 10px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; }
+  .badge-green { background: rgba(46,204,113,0.2); color: var(--green); }
+  .badge-red { background: rgba(231,76,60,0.2); color: var(--red); }
+  .results-actions { display: flex; gap: 12px; margin-top: 24px; }
+  .results-actions button { flex: 1; padding: 12px; border-radius: var(--radius); border: none; cursor: pointer; font-family: inherit; font-size: 0.95rem; font-weight: 600; transition: opacity 0.15s; }
+  .btn-primary { background: var(--accent2); color: #fff; }
+  .btn-secondary { background: var(--border); color: var(--text); }
+  .btn-primary:hover, .btn-secondary:hover { opacity: 0.8; }
+
+  /* ── SCORE SCREEN ── */
+  .score-header { text-align: center; padding: 30px 0 20px; }
+  .overall-ring { margin: 20px auto; width: 120px; height: 120px; position: relative; }
+  .ring-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); text-align: center; }
+  .ring-pct { font-size: 1.6rem; font-weight: 800; color: var(--accent2); }
+  .ring-sub { font-size: 0.7rem; color: var(--text-dim); }
+
+  .section-title {
+    font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-dim);
+    margin: 20px 0 10px;
+  }
+  .shortcut-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 14px; background: var(--surface); border-radius: 8px; margin-bottom: 6px;
+    border: 1px solid var(--border); font-size: 0.88rem;
+  }
+  .shortcut-row .desc { flex: 1; }
+  .shortcut-row .kbd { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.82rem; color: var(--accent2); background: rgba(15,126,168,0.1); padding: 2px 8px; border-radius: 4px; margin: 0 10px; }
+  .shortcut-row .ratio { color: var(--text-dim); font-size: 0.78rem; min-width: 70px; text-align: right; }
+  .shortcut-row .dot { width: 8px; height: 8px; border-radius: 50%; margin-left: 8px; }
+  .dot-green { background: var(--green); }
+  .dot-red { background: var(--red); }
+  .dot-gray { background: var(--text-dim); }
+  .dot-yellow { background: var(--yellow); }
+
+  .category-header {
+    background: var(--card); padding: 10px 14px; border-radius: 8px; margin: 14px 0 8px;
+    font-weight: 600; font-size: 0.88rem; display: flex; align-items: center; gap: 8px; cursor: pointer;
+  }
+  .category-header .toggle { margin-left: auto; color: var(--text-dim); font-size: 0.8rem; }
+
+  /* ── REFERENCE ── */
+  .search-bar {
+    width: 100%; padding: 12px 16px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); color: var(--text); font-family: inherit; font-size: 0.95rem;
+    margin: 16px 0;
+  }
+  .search-bar:focus { outline: none; border-color: var(--accent2); }
+  .ref-item {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    padding: 11px 14px; border-bottom: 1px solid var(--border); font-size: 0.88rem; gap: 12px;
+  }
+  .ref-item:hover { background: var(--surface); }
+  .ref-item .desc { flex: 1; }
+  .ref-item .category-tag {
+    font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.5px;
+    background: var(--border); padding: 2px 6px; border-radius: 3px; color: var(--text-dim);
+    white-space: nowrap;
+  }
+  .ref-kbd { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.82rem; color: var(--accent2); background: rgba(15,126,168,0.1); padding: 2px 8px; border-radius: 4px; white-space: nowrap; }
+  .ref-table { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 8px; }
+
+  /* Scrollable areas */
+  .scroll-area { max-height: calc(100vh - 200px); overflow-y: auto; padding-right: 4px; }
+  .scroll-area::-webkit-scrollbar { width: 4px; }
+  .scroll-area::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  /* Reset confirm */
+  .confirm-modal {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 100;
+  }
+  .confirm-modal.show { display: flex; }
+  .confirm-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px; max-width: 360px; text-align: center; }
+  .confirm-box h3 { margin-bottom: 10px; }
+  .confirm-box p { color: var(--text-dim); font-size: 0.9rem; margin-bottom: 20px; }
+  .confirm-actions { display: flex; gap: 10px; }
+  .confirm-actions button { flex: 1; padding: 10px; border-radius: 8px; border: none; cursor: pointer; font-family: inherit; font-weight: 600; }
+  .btn-confirm-danger { background: var(--red); color: #fff; }
+  .btn-confirm-cancel { background: var(--border); color: var(--text); }
+
+  /* ── CATEGORY PICKER ── */
+  .cat-all-row {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--card); border: 1px solid var(--accent2);
+    border-radius: var(--radius); padding: 14px 16px; margin-bottom: 10px;
+  }
+  .cat-check-label {
+    display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none;
+  }
+  .cat-check-label input[type=checkbox] { display: none; }
+  .cat-check-box {
+    width: 20px; height: 20px; border: 2px solid var(--border); border-radius: 5px;
+    background: var(--surface); flex-shrink: 0; position: relative; transition: all 0.15s;
+  }
+  .cat-check-label input:checked + .cat-check-box {
+    background: var(--accent2); border-color: var(--accent2);
+  }
+  .cat-check-label input:checked + .cat-check-box::after {
+    content: '✓'; position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%,-50%); color: #fff; font-size: 12px; font-weight: 700;
+  }
+  .cat-row {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 13px 16px; margin-bottom: 8px;
+    transition: border-color 0.15s;
+  }
+  .cat-row:has(input:checked) { border-color: var(--accent2); }
+  .cat-row-left { display: flex; align-items: center; gap: 10px; }
+  .cat-tag { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px;
+    color: var(--text-dim); background: var(--border); padding: 2px 7px; border-radius: 3px; }
+  .cat-count { font-size: 0.8rem; color: var(--text-dim); }
+
+  @media (max-width: 500px) {
+    .menu-grid { grid-template-columns: 1fr; }
+    .options-grid { grid-template-columns: 1fr; }
+    .results-actions { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HOME SCREEN -->
+<div id="screen-home" class="screen active">
+  <div class="home-header">
+    <span class="emoji">⌨️</span>
+    <h1>Shortcuts Trainer</h1>
+    <p>Mac & iOS keyboard shortcut mastery with spaced repetition</p>
+  </div>
+
+  <div id="home-stats" class="stats-strip">
+    <div class="stat-item"><div class="val" id="stat-total">0</div><div class="key">Questions</div></div>
+    <div class="stat-item"><div class="val" id="stat-correct">0</div><div class="key">Correct</div></div>
+    <div class="stat-item"><div class="val" id="stat-pct">—</div><div class="key">Accuracy</div></div>
+    <div class="stat-item"><div class="val" id="stat-streak">0</div><div class="key">Streak</div></div>
+    <div class="stat-item"><div class="val" id="stat-mastered">0</div><div class="key">Mastered</div></div>
+  </div>
+
+  <div class="menu-grid" style="margin-top:20px">
+    <button class="menu-btn" onclick="openCatPicker('quick')">
+      <span class="icon">⚡</span>
+      <span class="label">Quick Drill</span>
+      <span class="sub">10 questions · ~2 min</span>
+    </button>
+    <button class="menu-btn" onclick="openCatPicker('extended')">
+      <span class="icon">🔥</span>
+      <span class="label">Extended Drill</span>
+      <span class="sub">30 questions · ~6 min</span>
+    </button>
+    <button class="menu-btn" onclick="showScreen('screen-score')">
+      <span class="icon">📊</span>
+      <span class="label">My Scores</span>
+      <span class="sub">Progress per shortcut</span>
+    </button>
+    <button class="menu-btn" onclick="showScreen('screen-reference')">
+      <span class="icon">📖</span>
+      <span class="label">All Shortcuts</span>
+      <span class="sub">Browse the full list</span>
+    </button>
+    <button class="menu-btn danger full" onclick="confirmReset()">
+      <span class="label" style="color:var(--red)">🗑️ Reset All Progress</span>
+      <span class="sub">Clear scores and start fresh</span>
+    </button>
+  </div>
+</div>
+
+<!-- CATEGORY PICKER SCREEN -->
+<div id="screen-catpicker" class="screen">
+  <div class="drill-header" style="padding-top:24px">
+    <button class="back-btn" onclick="showScreen('screen-home')">← Back</button>
+    <h2 style="flex:1;text-align:center" id="catpicker-title">Quick Drill</h2>
+    <div style="width:60px"></div>
+  </div>
+  <p style="color:var(--text-dim);font-size:0.88rem;margin:4px 0 18px;text-align:center">Choose which categories to include</p>
+
+  <div class="cat-all-row">
+    <label class="cat-check-label">
+      <input type="checkbox" id="cat-all" onchange="toggleAllCats(this.checked)">
+      <span class="cat-check-box"></span>
+      <span style="font-weight:600">All Categories</span>
+    </label>
+    <span id="cat-all-count" style="color:var(--text-dim);font-size:0.82rem"></span>
+  </div>
+
+  <div id="cat-list"></div>
+
+  <button id="cat-start-btn" class="next-btn show" style="margin-top:20px" onclick="startDrillWithCats()">
+    Start Drill →
+  </button>
+</div>
+
+<!-- DRILL SCREEN -->
+<div id="screen-drill" class="screen">
+  <div class="drill-header">
+    <button class="back-btn" onclick="endDrill()">← Back</button>
+    <div style="text-align:center;flex:1">
+      <span id="drill-label" style="font-weight:600">Quick Drill</span>
+      <span id="drill-counter" style="color:var(--text-dim);font-size:0.85rem;margin-left:10px">Q 1 / 10</span>
+    </div>
+    <span id="drill-score-live" style="font-weight:700;color:var(--accent2)">0 / 0</span>
+  </div>
+  <div class="progress-bar-wrap"><div class="progress-bar" id="drill-progress"></div></div>
+
+  <div style="margin-top:24px">
+    <div class="question-card">
+      <span class="question-tag" id="q-tag">Mac Shortcuts</span>
+      <div id="q-text" class="question-text" style="margin-top:8px"></div>
+      <div id="q-kbd" style="margin-top:12px"></div>
+    </div>
+
+    <div class="options-grid" id="options-grid"></div>
+
+    <div class="feedback-bar" id="feedback-bar">
+      <span class="feedback-icon" id="feedback-icon"></span>
+      <span id="feedback-text"></span>
+    </div>
+
+    <button class="next-btn" id="next-btn" onclick="nextQuestion()">Next Question →</button>
+  </div>
+</div>
+
+<!-- RESULTS SCREEN -->
+<div id="screen-results" class="screen">
+  <div class="results-card" style="margin-top:30px">
+    <div id="results-grade" class="grade">🎯</div>
+    <div class="results-score" id="results-score">8/10</div>
+    <div class="results-label" id="results-label">Great work! Keep it up.</div>
+    <div class="results-breakdown" id="results-breakdown"></div>
+    <div class="results-actions">
+      <button class="btn-secondary" onclick="startDrill(lastDrillMode, lastDrillCats)">Try Again</button>
+      <button class="btn-primary" onclick="showScreen('screen-home')">Home</button>
+    </div>
+  </div>
+</div>
+
+<!-- SCORE SCREEN -->
+<div id="screen-score" class="screen">
+  <div class="drill-header" style="padding-top:24px">
+    <button class="back-btn" onclick="showScreen('screen-home')">← Back</button>
+    <h2 style="flex:1;text-align:center">My Progress</h2>
+    <div style="width:60px"></div>
+  </div>
+  <div id="score-content" class="scroll-area"></div>
+</div>
+
+<!-- REFERENCE SCREEN -->
+<div id="screen-reference" class="screen">
+  <div class="drill-header" style="padding-top:24px">
+    <button class="back-btn" onclick="showScreen('screen-home')">← Back</button>
+    <h2 style="flex:1;text-align:center">All Shortcuts</h2>
+    <div style="width:60px"></div>
+  </div>
+  <input type="text" class="search-bar" id="ref-search" placeholder="🔍  Search shortcuts or descriptions…" oninput="renderReference()">
+  <div id="ref-content" class="scroll-area"></div>
+</div>
+
+<!-- CONFIRM MODAL -->
+<div class="confirm-modal" id="confirm-modal">
+  <div class="confirm-box">
+    <h3>Reset Progress?</h3>
+    <p>All your scores and learning data will be permanently deleted.</p>
+    <div class="confirm-actions">
+      <button class="btn-confirm-danger" onclick="doReset()">Yes, Reset</button>
+      <button class="btn-confirm-cancel" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════
+//  SHORTCUTS DATABASE
+// ════════════════════════════════════════════════════
+const SHORTCUTS = [
+  // ── Mac General ──
+  { id:'m01', kbd:'⌘ C',          desc:'Copy selected item',                       cat:'Mac • General' },
+  { id:'m02', kbd:'⌘ V',          desc:'Paste copied item',                        cat:'Mac • General' },
+  { id:'m03', kbd:'⌘ X',          desc:'Cut selected item',                        cat:'Mac • General' },
+  { id:'m04', kbd:'⌘ Z',          desc:'Undo last action',                         cat:'Mac • General' },
+  { id:'m05', kbd:'⌘ ⇧ Z',        desc:'Redo last undone action',                  cat:'Mac • General' },
+  { id:'m06', kbd:'⌘ A',          desc:'Select all items',                         cat:'Mac • General' },
+  { id:'m07', kbd:'⌘ S',          desc:'Save the current document',                cat:'Mac • General' },
+  { id:'m08', kbd:'⌘ ⇧ S',        desc:'Save As (duplicate/rename)',               cat:'Mac • General' },
+  { id:'m09', kbd:'⌘ P',          desc:'Print the current document',               cat:'Mac • General' },
+  { id:'m10', kbd:'⌘ F',          desc:'Find (search in document or page)',         cat:'Mac • General' },
+  { id:'m11', kbd:'⌘ G',          desc:'Find next occurrence',                     cat:'Mac • General' },
+  { id:'m12', kbd:'⌘ ⇧ G',        desc:'Find previous occurrence',                 cat:'Mac • General' },
+  { id:'m13', kbd:'⌘ Q',          desc:'Quit the current app',                     cat:'Mac • General' },
+  { id:'m14', kbd:'⌘ W',          desc:'Close the current window or tab',          cat:'Mac • General' },
+  { id:'m15', kbd:'⌘ N',          desc:'New document or window',                   cat:'Mac • General' },
+  { id:'m16', kbd:'⌘ T',          desc:'New tab (browser/Finder)',                  cat:'Mac • General' },
+  { id:'m17', kbd:'⌘ ,',          desc:'Open preferences/settings for app',        cat:'Mac • General' },
+  { id:'m18', kbd:'⌘ H',          desc:'Hide the current app window',              cat:'Mac • General' },
+  { id:'m19', kbd:'⌘ ⌥ H',        desc:'Hide all other app windows',               cat:'Mac • General' },
+  { id:'m20', kbd:'⌘ M',          desc:'Minimize window to Dock',                  cat:'Mac • General' },
+  { id:'m21', kbd:'⌘ ⌥ M',        desc:'Minimize all windows of current app',      cat:'Mac • General' },
+  { id:'m22', kbd:'⌘ Tab',        desc:'Switch to next open app',                  cat:'Mac • General' },
+  { id:'m23', kbd:'⌘ ⇧ Tab',      desc:'Switch to previous open app',              cat:'Mac • General' },
+  { id:'m24', kbd:'⌘ `',          desc:'Switch between windows of same app',       cat:'Mac • General' },
+  { id:'m25', kbd:'⌘ ⌥ Esc',      desc:'Force Quit an app',                        cat:'Mac • General' },
+  { id:'m26', kbd:'⌘ Space',      desc:'Open Spotlight Search',                    cat:'Mac • General' },
+  { id:'m27', kbd:'⌃ Space',      desc:'Switch input source / keyboard layout',    cat:'Mac • General' },
+  { id:'m28', kbd:'⌃ ⌘ Q',        desc:'Lock screen immediately',                  cat:'Mac • General' },
+  { id:'m29', kbd:'⌘ ⇧ Q',        desc:'Log out current user',                     cat:'Mac • General' },
+  { id:'m30', kbd:'⌃ ⌘ F',        desc:'Toggle full-screen mode',                  cat:'Mac • General' },
+  { id:'m31', kbd:'⌘ ⌥ D',        desc:'Show or hide the Dock',                    cat:'Mac • General' },
+  { id:'m32', kbd:'⌘ B',          desc:'Bold selected text',                       cat:'Mac • General' },
+  { id:'m33', kbd:'⌘ I',          desc:'Italicize selected text',                  cat:'Mac • General' },
+  { id:'m34', kbd:'⌘ U',          desc:'Underline selected text',                  cat:'Mac • General' },
+  { id:'m35', kbd:'⌘ K',          desc:'Insert hyperlink',                         cat:'Mac • General' },
+  { id:'m36', kbd:'⌘ =',          desc:'Zoom in',                                  cat:'Mac • General' },
+  { id:'m37', kbd:'⌘ -',          desc:'Zoom out',                                 cat:'Mac • General' },
+  { id:'m38', kbd:'⌘ 0',          desc:'Reset zoom to 100%',                       cat:'Mac • General' },
+
+  // ── Mac Screenshots ──
+  { id:'ms01', kbd:'⌘ ⇧ 3',       desc:'Screenshot — entire screen',               cat:'Mac • Screenshots' },
+  { id:'ms02', kbd:'⌘ ⇧ 4',       desc:'Screenshot — drag to select area',         cat:'Mac • Screenshots' },
+  { id:'ms03', kbd:'⌘ ⇧ 4 + Space',desc:'Screenshot — click to capture a window',  cat:'Mac • Screenshots' },
+  { id:'ms04', kbd:'⌘ ⇧ 5',       desc:'Screenshot/recording options panel',       cat:'Mac • Screenshots' },
+  { id:'ms05', kbd:'⌘ ⇧ 6',       desc:'Screenshot of the Touch Bar',              cat:'Mac • Screenshots' },
+  { id:'ms06', kbd:'⌘ ⌃ ⇧ 3',     desc:'Screenshot entire screen to clipboard',    cat:'Mac • Screenshots' },
+  { id:'ms07', kbd:'⌘ ⌃ ⇧ 4',     desc:'Screenshot selection to clipboard',        cat:'Mac • Screenshots' },
+
+  // ── Mac Finder ──
+  { id:'mf01', kbd:'⌘ ⌫',         desc:'Move selected file to Trash',              cat:'Mac • Finder' },
+  { id:'mf02', kbd:'⌘ ⇧ ⌫',       desc:'Empty the Trash',                          cat:'Mac • Finder' },
+  { id:'mf03', kbd:'⌘ ⇧ N',       desc:'Create new folder',                        cat:'Mac • Finder' },
+  { id:'mf04', kbd:'⌘ D',         desc:'Duplicate selected file',                  cat:'Mac • Finder' },
+  { id:'mf05', kbd:'⌘ E',         desc:'Eject selected disk or volume',            cat:'Mac • Finder' },
+  { id:'mf06', kbd:'⌘ J',         desc:'Show view options (Finder)',               cat:'Mac • Finder' },
+  { id:'mf07', kbd:'⌘ Y',         desc:'Quick Look at selected item',              cat:'Mac • Finder' },
+  { id:'mf08', kbd:'Space',        desc:'Quick Look preview (in Finder)',           cat:'Mac • Finder' },
+  { id:'mf09', kbd:'⌘ ⇧ G',       desc:'Go to folder (type path)',                 cat:'Mac • Finder' },
+  { id:'mf10', kbd:'⌘ ⇧ A',       desc:'Open the Applications folder',             cat:'Mac • Finder' },
+  { id:'mf11', kbd:'⌘ ⇧ D',       desc:'Open the Desktop folder',                  cat:'Mac • Finder' },
+  { id:'mf12', kbd:'⌘ ⇧ H',       desc:'Open the Home folder',                     cat:'Mac • Finder' },
+  { id:'mf13', kbd:'⌘ ⇧ O',       desc:'Open the Documents folder',                cat:'Mac • Finder' },
+  { id:'mf14', kbd:'⌘ ⇧ F',       desc:'Open All My Files (Finder)',               cat:'Mac • Finder' },
+  { id:'mf15', kbd:'⌘ 1',         desc:'Finder icon view',                         cat:'Mac • Finder' },
+  { id:'mf16', kbd:'⌘ 2',         desc:'Finder list view',                         cat:'Mac • Finder' },
+  { id:'mf17', kbd:'⌘ 3',         desc:'Finder column view',                       cat:'Mac • Finder' },
+  { id:'mf18', kbd:'⌘ 4',         desc:'Finder gallery view',                      cat:'Mac • Finder' },
+  { id:'mf19', kbd:'⌘ [',         desc:'Go back in Finder',                        cat:'Mac • Finder' },
+  { id:'mf20', kbd:'⌘ ]',         desc:'Go forward in Finder',                     cat:'Mac • Finder' },
+  { id:'mf21', kbd:'⌘ ↑',         desc:'Go to parent folder (Finder)',             cat:'Mac • Finder' },
+  { id:'mf22', kbd:'⌘ ↓',         desc:'Open selected item (Finder)',              cat:'Mac • Finder' },
+  { id:'mf23', kbd:'Return',       desc:'Rename selected file in Finder',           cat:'Mac • Finder' },
+  { id:'mf24', kbd:'⌘ K',         desc:'Connect to server (Finder)',               cat:'Mac • Finder' },
+  { id:'mf25', kbd:'⌘ L',         desc:'Make alias of selected item',              cat:'Mac • Finder' },
+  { id:'mf26', kbd:'⌘ R',         desc:'Show original of alias (Finder)',          cat:'Mac • Finder' },
+  { id:'mf27', kbd:'⌘ I',         desc:'Get info about selected item',             cat:'Mac • Finder' },
+
+  // ── Mac System ──
+  { id:'msy01', kbd:'⌃ ↑',        desc:'Mission Control — all windows',            cat:'Mac • System' },
+  { id:'msy02', kbd:'⌃ ↓',        desc:'App Exposé — current app windows',         cat:'Mac • System' },
+  { id:'msy03', kbd:'⌃ ←',        desc:'Move to Desktop / Space on the left',      cat:'Mac • System' },
+  { id:'msy04', kbd:'⌃ →',        desc:'Move to Desktop / Space on the right',     cat:'Mac • System' },
+  { id:'msy05', kbd:'⌃ 1–9',      desc:'Switch to specific Desktop / Space',       cat:'Mac • System' },
+  { id:'msy06', kbd:'⌘ ⌥ Power',  desc:'Put Mac to sleep',                         cat:'Mac • System' },
+  { id:'msy07', kbd:'⌃ ⌘ Power',  desc:'Force restart Mac',                        cat:'Mac • System' },
+  { id:'msy08', kbd:'⌃ ⌘ ⏏',      desc:'Quit all apps then restart',               cat:'Mac • System' },
+  { id:'msy09', kbd:'⌃ ⌥ ⌘ Power',desc:'Quit all apps then shut down',             cat:'Mac • System' },
+  { id:'msy10', kbd:'⌘ ⌥ ⌃ ⏏',    desc:'Shut down Mac immediately',               cat:'Mac • System' },
+
+  // ── Mac Text Editing ──
+  { id:'mt01', kbd:'⌥ ⌫',         desc:'Delete word to the left',                  cat:'Mac • Text Editing' },
+  { id:'mt02', kbd:'Fn ⌫',        desc:'Forward delete (delete right)',             cat:'Mac • Text Editing' },
+  { id:'mt03', kbd:'⌘ ⌫',         desc:'Delete to beginning of line',              cat:'Mac • Text Editing' },
+  { id:'mt04', kbd:'⌥ ←',         desc:'Move cursor one word left',                cat:'Mac • Text Editing' },
+  { id:'mt05', kbd:'⌥ →',         desc:'Move cursor one word right',               cat:'Mac • Text Editing' },
+  { id:'mt06', kbd:'⌘ ←',         desc:'Move cursor to beginning of line',         cat:'Mac • Text Editing' },
+  { id:'mt07', kbd:'⌘ →',         desc:'Move cursor to end of line',               cat:'Mac • Text Editing' },
+  { id:'mt08', kbd:'⌘ ↑',         desc:'Move cursor to beginning of document',     cat:'Mac • Text Editing' },
+  { id:'mt09', kbd:'⌘ ↓',         desc:'Move cursor to end of document',           cat:'Mac • Text Editing' },
+  { id:'mt10', kbd:'⇧ ⌥ ←',       desc:'Select word to the left',                  cat:'Mac • Text Editing' },
+  { id:'mt11', kbd:'⇧ ⌥ →',       desc:'Select word to the right',                 cat:'Mac • Text Editing' },
+  { id:'mt12', kbd:'⇧ ⌘ ←',       desc:'Select to beginning of line',              cat:'Mac • Text Editing' },
+  { id:'mt13', kbd:'⇧ ⌘ →',       desc:'Select to end of line',                    cat:'Mac • Text Editing' },
+  { id:'mt14', kbd:'⌃ A',         desc:'Move to beginning of paragraph/line',      cat:'Mac • Text Editing' },
+  { id:'mt15', kbd:'⌃ E',         desc:'Move to end of paragraph/line',            cat:'Mac • Text Editing' },
+  { id:'mt16', kbd:'⌃ K',         desc:'Delete to end of paragraph/line',          cat:'Mac • Text Editing' },
+  { id:'mt17', kbd:'⌃ D',         desc:'Forward delete one character',             cat:'Mac • Text Editing' },
+  { id:'mt18', kbd:'⌃ H',         desc:'Delete one character to the left',         cat:'Mac • Text Editing' },
+  { id:'mt19', kbd:'⌃ T',         desc:'Swap (transpose) the two characters around cursor', cat:'Mac • Text Editing' },
+
+  // ── Mac Browser ──
+  { id:'mb01', kbd:'⌘ L',         desc:'Focus the address/URL bar',                cat:'Mac • Browser' },
+  { id:'mb02', kbd:'⌘ R',         desc:'Reload / refresh the page',                cat:'Mac • Browser' },
+  { id:'mb03', kbd:'⌘ ⇧ R',       desc:'Hard reload (bypass cache)',               cat:'Mac • Browser' },
+  { id:'mb04', kbd:'⌘ ⇧ T',       desc:'Reopen last closed tab',                   cat:'Mac • Browser' },
+  { id:'mb05', kbd:'⌘ ⇧ N',       desc:'Open new private/incognito window',        cat:'Mac • Browser' },
+  { id:'mb06', kbd:'⌘ D',         desc:'Bookmark the current page',                cat:'Mac • Browser' },
+  { id:'mb07', kbd:'⌘ ⇧ B',       desc:'Show/hide the bookmarks bar',              cat:'Mac • Browser' },
+  { id:'mb08', kbd:'⌃ Tab',       desc:'Switch to next tab (browser)',             cat:'Mac • Browser' },
+  { id:'mb09', kbd:'⌃ ⇧ Tab',     desc:'Switch to previous tab (browser)',        cat:'Mac • Browser' },
+  { id:'mb10', kbd:'⌘ 1–8',       desc:'Jump to specific numbered tab',            cat:'Mac • Browser' },
+  { id:'mb11', kbd:'⌘ 9',         desc:'Jump to last tab',                         cat:'Mac • Browser' },
+  { id:'mb12', kbd:'⌘ ⌥ I',       desc:'Open developer tools',                     cat:'Mac • Browser' },
+  { id:'mb13', kbd:'⌘ ⌥ J',       desc:'Open JavaScript console',                  cat:'Mac • Browser' },
+  { id:'mb14', kbd:'⌘ U',         desc:'View page source',                         cat:'Mac • Browser' },
+  { id:'mb15', kbd:'⌘ ⇧ J',       desc:'Open Downloads (Safari)',                  cat:'Mac • Browser' },
+
+  // ── iOS (with hardware keyboard) ──
+  { id:'i01', kbd:'⌘ H',          desc:'Go to Home screen (iOS)',                  cat:'iOS • Hardware Keyboard' },
+  { id:'i02', kbd:'⌘ Space',      desc:'Open Spotlight Search (iOS)',              cat:'iOS • Hardware Keyboard' },
+  { id:'i03', kbd:'⌘ Tab',        desc:'App switcher (iOS)',                       cat:'iOS • Hardware Keyboard' },
+  { id:'i04', kbd:'⌘ ⇧ 3',        desc:'Take screenshot (iOS)',                    cat:'iOS • Hardware Keyboard' },
+  { id:'i05', kbd:'⌘ ⇧ 4',        desc:'Take screenshot with markup (iOS)',        cat:'iOS • Hardware Keyboard' },
+  { id:'i06', kbd:'⌘ .',          desc:'Dismiss/stop current action (iOS)',        cat:'iOS • Hardware Keyboard' },
+  { id:'i07', kbd:'⌃ Space',      desc:'Switch keyboard language (iOS)',           cat:'iOS • Hardware Keyboard' },
+  { id:'i08', kbd:'⌘ ,',          desc:'Open Settings for current app (iOS)',      cat:'iOS • Hardware Keyboard' },
+  { id:'i09', kbd:'⌘ N',          desc:'New item (Notes, Mail, etc.) — iOS',      cat:'iOS • Hardware Keyboard' },
+  { id:'i10', kbd:'⌘ F',          desc:'Find/search within the app (iOS)',         cat:'iOS • Hardware Keyboard' },
+  { id:'i11', kbd:'⌘ ⇧ N',        desc:'New folder (Files app — iOS)',             cat:'iOS • Hardware Keyboard' },
+  { id:'i12', kbd:'⌘ C',          desc:'Copy selected text (iOS)',                 cat:'iOS • Hardware Keyboard' },
+  { id:'i13', kbd:'⌘ V',          desc:'Paste text (iOS)',                         cat:'iOS • Hardware Keyboard' },
+  { id:'i14', kbd:'⌘ X',          desc:'Cut selected text (iOS)',                  cat:'iOS • Hardware Keyboard' },
+  { id:'i15', kbd:'⌘ Z',          desc:'Undo (iOS)',                               cat:'iOS • Hardware Keyboard' },
+  { id:'i16', kbd:'⌘ A',          desc:'Select all (iOS)',                         cat:'iOS • Hardware Keyboard' },
+  { id:'i17', kbd:'⌘ B',          desc:'Bold text (iOS)',                          cat:'iOS • Hardware Keyboard' },
+  { id:'i18', kbd:'⌘ I',          desc:'Italic text (iOS)',                        cat:'iOS • Hardware Keyboard' },
+  { id:'i19', kbd:'⌘ U',          desc:'Underline text (iOS)',                     cat:'iOS • Hardware Keyboard' },
+  { id:'i20', kbd:'⌥ ⌫',          desc:'Delete previous word (iOS)',               cat:'iOS • Hardware Keyboard' },
+
+  // ── Globe Key (iPadOS) ──
+  { id:'g01', kbd:'🌐 A',          desc:'App Switcher (iPadOS Globe key)',          cat:'iPadOS • Globe Key' },
+  { id:'g02', kbd:'🌐 H',          desc:'Home screen (iPadOS Globe key)',           cat:'iPadOS • Globe Key' },
+  { id:'g03', kbd:'🌐 Space',      desc:'Open emoji picker (iPadOS)',               cat:'iPadOS • Globe Key' },
+  { id:'g04', kbd:'🌐 ↓',          desc:'Show Dock (iPadOS Globe key)',             cat:'iPadOS • Globe Key' },
+  { id:'g05', kbd:'🌐 ←',          desc:'Slide Over panel from left (iPadOS)',      cat:'iPadOS • Globe Key' },
+  { id:'g06', kbd:'🌐 →',          desc:'Slide Over panel from right (iPadOS)',     cat:'iPadOS • Globe Key' },
+  { id:'g07', kbd:'🌐 C',          desc:'Control Centre (iPadOS Globe key)',        cat:'iPadOS • Globe Key' },
+  { id:'g08', kbd:'🌐 D',          desc:'Dictation (iPadOS Globe key)',             cat:'iPadOS • Globe Key' },
+  { id:'g09', kbd:'🌐 F',          desc:'Floating keyboard (iPadOS Globe key)',     cat:'iPadOS • Globe Key' },
+
+  // ── Accessibility ──
+  { id:'ac01', kbd:'⌘ ⌥ F5',      desc:'Open Accessibility Options panel',         cat:'Mac • Accessibility' },
+  { id:'ac02', kbd:'⌃ ⌥ ⌘ 8',     desc:'Toggle Invert Colors',                     cat:'Mac • Accessibility' },
+  { id:'ac03', kbd:'⌃ ⌥ ⌘ ,',     desc:'Decrease contrast',                        cat:'Mac • Accessibility' },
+  { id:'ac04', kbd:'⌃ ⌥ ⌘ .',     desc:'Increase contrast',                        cat:'Mac • Accessibility' },
+  { id:'ac05', kbd:'⌘ ⌥ +',       desc:'Zoom in (Zoom accessibility feature)',      cat:'Mac • Accessibility' },
+  { id:'ac06', kbd:'⌘ ⌥ -',       desc:'Zoom out (Zoom accessibility feature)',     cat:'Mac • Accessibility' },
+  { id:'ac07', kbd:'⌘ F5',        desc:'Toggle VoiceOver on/off',                  cat:'Mac • Accessibility' },
+];
+
+const CATEGORIES = [...new Set(SHORTCUTS.map(s => s.cat))];
+
+// ════════════════════════════════════════════════════
+//  STATE & PERSISTENCE
+// ════════════════════════════════════════════════════
+let state = {
+  scores: {},      // id -> { correct: n, total: n, weight: n }
+  totalAnswered: 0,
+  totalCorrect: 0,
+  streak: 0,
+  bestStreak: 0,
+  sessions: 0,
+};
+
+function loadState() {
+  try {
+    const saved = localStorage.getItem('shortcuts_trainer_v2');
+    if (saved) state = JSON.parse(saved);
+    // Ensure every shortcut has a scores entry
+    SHORTCUTS.forEach(s => {
+      if (!state.scores[s.id]) state.scores[s.id] = { correct: 0, total: 0, weight: 10 };
+    });
+  } catch(e) {
+    initState();
+  }
+}
+
+function initState() {
+  state = { scores: {}, totalAnswered: 0, totalCorrect: 0, streak: 0, bestStreak: 0, sessions: 0 };
+  SHORTCUTS.forEach(s => { state.scores[s.id] = { correct: 0, total: 0, weight: 10 }; });
+}
+
+function saveState() {
+  try { localStorage.setItem('shortcuts_trainer_v2', JSON.stringify(state)); } catch(e) {}
+}
+
+// ════════════════════════════════════════════════════
+//  SCREEN NAVIGATION
+// ════════════════════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if (id === 'screen-home') updateHomeStats();
+  if (id === 'screen-score') renderScore();
+  if (id === 'screen-reference') renderReference();
+  window.scrollTo(0, 0);
+}
+
+// ════════════════════════════════════════════════════
+//  HOME STATS
+// ════════════════════════════════════════════════════
+function updateHomeStats() {
+  const mastered = SHORTCUTS.filter(s => {
+    const sc = state.scores[s.id];
+    return sc && sc.total >= 3 && (sc.correct / sc.total) >= 0.8;
+  }).length;
+  document.getElementById('stat-total').textContent = state.totalAnswered;
+  document.getElementById('stat-correct').textContent = state.totalCorrect;
+  document.getElementById('stat-pct').textContent = state.totalAnswered > 0
+    ? Math.round(100 * state.totalCorrect / state.totalAnswered) + '%' : '—';
+  document.getElementById('stat-streak').textContent = state.bestStreak;
+  document.getElementById('stat-mastered').textContent = mastered + '/' + SHORTCUTS.length;
+}
+
+// ════════════════════════════════════════════════════
+//  DRILL LOGIC
+// ════════════════════════════════════════════════════
+let drillQuestions = [];
+let drillIndex = 0;
+let drillCorrect = 0;
+let drillResults = [];
+let lastDrillMode = 'quick';
+let answerLocked = false;
+
+function pickWeighted(pool) {
+  const total = pool.reduce((sum, s) => sum + (state.scores[s.id]?.weight ?? 10), 0);
+  let r = Math.random() * total;
+  for (const s of pool) {
+    r -= (state.scores[s.id]?.weight ?? 10);
+    if (r <= 0) return s;
+  }
+  return pool[pool.length - 1];
+}
+
+function buildDrill(count, cats) {
+  const catSet = new Set(cats);
+  const pool = SHORTCUTS.filter(s => catSet.has(s.cat));
+  const questions = [];
+  const usedIds = new Set();
+  while (questions.length < count && usedIds.size < pool.length) {
+    const available = pool.filter(x => !usedIds.has(x.id));
+    if (!available.length) break;
+    const s = pickWeighted(available);
+    usedIds.add(s.id);
+    const qtype = Math.random() < 0.5 ? 0 : 1;
+    // Wrong answers: prefer same pool, pad from all shortcuts if needed
+    let wrongPool = pool.filter(x => x.id !== s.id);
+    if (wrongPool.length < 3) wrongPool = SHORTCUTS.filter(x => x.id !== s.id);
+    const wrong = wrongPool.sort(() => Math.random() - 0.5).slice(0, 3);
+    const opts = shuffle([s, ...wrong]);
+    questions.push({ shortcut: s, qtype, opts });
+  }
+  return questions;
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+let lastDrillCats = null; // persists selected cats for "Try Again"
+
+function openCatPicker(mode) {
+  lastDrillMode = mode;
+  document.getElementById('catpicker-title').textContent = mode === 'quick' ? '⚡ Quick Drill' : '🔥 Extended Drill';
+
+  // Render category rows
+  const list = document.getElementById('cat-list');
+  list.innerHTML = '';
+  CATEGORIES.forEach(cat => {
+    const count = SHORTCUTS.filter(s => s.cat === cat).length;
+    const [group, name] = cat.split(' • ');
+    const row = document.createElement('div');
+    row.className = 'cat-row';
+    row.innerHTML = `<label class="cat-check-label" style="flex:1">
+      <input type="checkbox" class="cat-cb" value="${cat}" checked onchange="updateCatUI()">
+      <span class="cat-check-box"></span>
+      <span>${name || cat}</span>
+      <span class="cat-tag">${group}</span>
+    </label>
+    <span class="cat-count">${count}</span>`;
+    list.appendChild(row);
+  });
+
+  // If there were previously selected cats, restore them
+  if (lastDrillCats) {
+    document.querySelectorAll('.cat-cb').forEach(cb => {
+      cb.checked = lastDrillCats.includes(cb.value);
+    });
+  }
+  updateCatUI();
+  showScreen('screen-catpicker');
+}
+
+function updateCatUI() {
+  const cbs = [...document.querySelectorAll('.cat-cb')];
+  const checked = cbs.filter(cb => cb.checked);
+  const allChecked = checked.length === cbs.length;
+  const noneChecked = checked.length === 0;
+  document.getElementById('cat-all').checked = allChecked;
+  document.getElementById('cat-all').indeterminate = !allChecked && !noneChecked;
+  const total = checked.reduce((n, cb) => n + SHORTCUTS.filter(s => s.cat === cb.value).length, 0);
+  document.getElementById('cat-all-count').textContent = `${total} shortcuts`;
+  const btn = document.getElementById('cat-start-btn');
+  btn.disabled = noneChecked;
+  btn.style.opacity = noneChecked ? '0.4' : '1';
+}
+
+function toggleAllCats(checked) {
+  document.querySelectorAll('.cat-cb').forEach(cb => { cb.checked = checked; });
+  updateCatUI();
+}
+
+function startDrillWithCats() {
+  const selected = [...document.querySelectorAll('.cat-cb:checked')].map(cb => cb.value);
+  if (!selected.length) return;
+  lastDrillCats = selected;
+  startDrill(lastDrillMode, selected);
+}
+
+function startDrill(mode, cats) {
+  cats = cats || CATEGORIES;
+  lastDrillMode = mode;
+  lastDrillCats = cats;
+  const count = mode === 'quick' ? 10 : 30;
+  drillQuestions = buildDrill(count, cats);
+  drillIndex = 0;
+  drillCorrect = 0;
+  drillResults = [];
+  answerLocked = false;
+  state.sessions++;
+  const catLabel = cats.length === CATEGORIES.length ? 'All Categories' : cats.map(c => c.split(' • ')[1] || c).join(', ');
+  document.getElementById('drill-label').textContent = (mode === 'quick' ? '⚡ Quick' : '🔥 Extended') + ' · ' + catLabel;
+  showScreen('screen-drill');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const total = drillQuestions.length;
+  const q = drillQuestions[drillIndex];
+  answerLocked = false;
+
+  document.getElementById('drill-counter').textContent = `Q ${drillIndex + 1} / ${total}`;
+  document.getElementById('drill-score-live').textContent = `${drillCorrect} / ${drillIndex}`;
+  document.getElementById('drill-progress').style.width = `${(drillIndex / total) * 100}%`;
+
+  const tag = document.getElementById('q-tag');
+  tag.textContent = q.shortcut.cat;
+
+  const qText = document.getElementById('q-text');
+  const qKbd = document.getElementById('q-kbd');
+
+  if (q.qtype === 0) {
+    // Show description → pick shortcut
+    qText.textContent = 'Which shortcut performs this action?';
+    qKbd.innerHTML = `<em style="font-size:1.1rem;color:var(--text)">"${q.shortcut.desc}"</em>`;
+  } else {
+    // Show shortcut → pick description
+    qText.textContent = 'What does this shortcut do?';
+    qKbd.innerHTML = `<span class="kbd-display">${q.shortcut.kbd}</span>`;
+  }
+
+  // Build options
+  const grid = document.getElementById('options-grid');
+  grid.innerHTML = '';
+  q.opts.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.dataset.id = opt.id;
+    if (q.qtype === 0) {
+      btn.innerHTML = `<span class="kbd-option">${opt.kbd}</span><br>${opt.desc}`;
+    } else {
+      btn.textContent = opt.desc;
+    }
+    btn.onclick = () => selectAnswer(opt.id, q.shortcut.id, q);
+    grid.appendChild(btn);
+  });
+
+  // Hide feedback & next btn
+  const fb = document.getElementById('feedback-bar');
+  fb.classList.remove('show', 'correct', 'wrong');
+  document.getElementById('next-btn').classList.remove('show');
+}
+
+function selectAnswer(selectedId, correctId, q) {
+  if (answerLocked) return;
+  answerLocked = true;
+
+  const isCorrect = selectedId === correctId;
+  const sc = state.scores[correctId];
+  sc.total++;
+  state.totalAnswered++;
+
+  if (isCorrect) {
+    sc.correct++;
+    state.totalCorrect++;
+    state.streak++;
+    if (state.streak > state.bestStreak) state.bestStreak = state.streak;
+    sc.weight = Math.max(1, sc.weight - 2);
+    drillCorrect++;
+  } else {
+    state.streak = 0;
+    sc.weight = Math.min(25, sc.weight + 4);
+  }
+  saveState();
+
+  drillResults.push({ shortcut: q.shortcut, correct: isCorrect, chosen: q.opts.find(o => o.id === selectedId) });
+
+  // Highlight buttons
+  document.querySelectorAll('.option-btn').forEach(btn => {
+    btn.disabled = true;
+    if (btn.dataset.id === correctId) btn.classList.add('correct');
+    else if (btn.dataset.id === selectedId && !isCorrect) btn.classList.add('wrong');
+  });
+
+  // Feedback bar
+  const fb = document.getElementById('feedback-bar');
+  fb.classList.add('show', isCorrect ? 'correct' : 'wrong');
+  document.getElementById('feedback-icon').textContent = isCorrect ? '✅' : '❌';
+  document.getElementById('feedback-text').innerHTML = isCorrect
+    ? `<strong>Correct!</strong> ${q.shortcut.kbd} — ${q.shortcut.desc}`
+    : `<strong>Incorrect.</strong> The answer was <strong>${q.shortcut.kbd}</strong> — ${q.shortcut.desc}`;
+
+  // Score live update
+  document.getElementById('drill-score-live').textContent = `${drillCorrect} / ${drillIndex + 1}`;
+
+  // Next button
+  const nextBtn = document.getElementById('next-btn');
+  nextBtn.textContent = drillIndex + 1 < drillQuestions.length ? 'Next Question →' : 'See Results →';
+  nextBtn.classList.add('show');
+}
+
+function nextQuestion() {
+  drillIndex++;
+  if (drillIndex >= drillQuestions.length) {
+    showResults();
+  } else {
+    renderQuestion();
+  }
+}
+
+function endDrill() {
+  if (drillIndex > 0) showResults();
+  else showScreen('screen-home');
+}
+
+function showResults() {
+  const total = drillResults.length;
+  const pct = total > 0 ? Math.round(100 * drillCorrect / total) : 0;
+
+  document.getElementById('results-score').textContent = `${drillCorrect} / ${total}`;
+
+  let grade, label;
+  if (pct >= 95) { grade = '🏆'; label = 'Perfect! You\'re a shortcuts master!'; }
+  else if (pct >= 80) { grade = '🎯'; label = 'Excellent work! Almost mastered.'; }
+  else if (pct >= 60) { grade = '👍'; label = 'Good progress! Keep practising.'; }
+  else if (pct >= 40) { grade = '📚'; label = 'Keep at it — you\'re learning!'; }
+  else { grade = '💪'; label = 'Don\'t give up! Repetition is key.'; }
+
+  document.getElementById('results-grade').textContent = grade;
+  document.getElementById('results-label').textContent = label;
+
+  // Breakdown
+  const bd = document.getElementById('results-breakdown');
+  const wrongOnes = drillResults.filter(r => !r.correct);
+  const correctOnes = drillResults.filter(r => r.correct);
+  let html = `<div style="margin-bottom:12px;color:var(--text-dim);font-size:0.85rem">${pct}% accuracy · ${drillCorrect} correct · ${total - drillCorrect} wrong</div>`;
+
+  if (wrongOnes.length > 0) {
+    html += `<div class="section-title">Missed — review these</div>`;
+    wrongOnes.forEach(r => {
+      html += `<div class="breakdown-item">
+        <span>${r.shortcut.desc}</span>
+        <span style="margin-left:auto;display:flex;align-items:center;gap:8px">
+          <span class="kbd-option" style="font-size:0.8rem">${r.shortcut.kbd}</span>
+          <span class="breakdown-badge badge-red">missed</span>
+        </span>
+      </div>`;
+    });
+  }
+  if (correctOnes.length > 0 && correctOnes.length <= 8) {
+    html += `<div class="section-title" style="margin-top:12px">Got right</div>`;
+    correctOnes.slice(0, 6).forEach(r => {
+      html += `<div class="breakdown-item">
+        <span>${r.shortcut.desc}</span>
+        <span style="margin-left:auto;display:flex;align-items:center;gap:8px">
+          <span class="kbd-option" style="font-size:0.8rem">${r.shortcut.kbd}</span>
+          <span class="breakdown-badge badge-green">✓</span>
+        </span>
+      </div>`;
+    });
+  }
+  bd.innerHTML = html;
+  showScreen('screen-results');
+}
+
+// ════════════════════════════════════════════════════
+//  SCORE SCREEN
+// ════════════════════════════════════════════════════
+function renderScore() {
+  const mastered = SHORTCUTS.filter(s => { const sc=state.scores[s.id]; return sc&&sc.total>=3&&(sc.correct/sc.total)>=0.8; });
+  const learning = SHORTCUTS.filter(s => { const sc=state.scores[s.id]; return sc&&sc.total>0&&!mastered.includes(s); });
+  const unseen = SHORTCUTS.filter(s => !state.scores[s.id] || state.scores[s.id].total===0);
+
+  const pct = state.totalAnswered > 0 ? Math.round(100*state.totalCorrect/state.totalAnswered) : 0;
+
+  let html = `<div style="text-align:center;padding:16px 0 8px">
+    <div style="font-size:3rem;font-weight:800;color:var(--accent2)">${pct}%</div>
+    <div style="color:var(--text-dim);font-size:0.85rem;margin-top:4px">Overall accuracy · ${state.totalAnswered} questions answered</div>
+    <div style="display:flex;gap:20px;justify-content:center;margin-top:12px;font-size:0.85rem">
+      <span><strong style="color:var(--green)">${mastered.length}</strong> mastered</span>
+      <span><strong style="color:var(--yellow)">${learning.length}</strong> in progress</span>
+      <span><strong style="color:var(--text-dim)">${unseen.length}</strong> unseen</span>
+    </div>
+    <div style="height:8px;background:var(--border);border-radius:4px;margin:12px auto;max-width:280px;overflow:hidden">
+      <div style="height:8px;background:var(--green);border-radius:4px;width:${100*mastered.length/SHORTCUTS.length}%"></div>
+    </div>
+  </div>`;
+
+  const renderGroup = (list, title) => {
+    if (!list.length) return '';
+    let s = `<div class="section-title">${title}</div>`;
+    list.forEach(sh => {
+      const sc = state.scores[sh.id] || {correct:0,total:0};
+      const rate = sc.total > 0 ? Math.round(100*sc.correct/sc.total) : null;
+      const dotClass = sc.total===0 ? 'dot-gray' : rate>=80 ? 'dot-green' : rate>=50 ? 'dot-yellow' : 'dot-red';
+      s += `<div class="shortcut-row">
+        <span class="desc">${sh.desc}</span>
+        <span class="kbd">${sh.kbd}</span>
+        <span class="ratio">${sc.total > 0 ? rate+'%' : 'unseen'}</span>
+        <span class="dot ${dotClass}"></span>
+      </div>`;
+    });
+    return s;
+  };
+
+  // Group by category
+  CATEGORIES.forEach(cat => {
+    const inCat = SHORTCUTS.filter(s => s.cat === cat);
+    const masteredCat = inCat.filter(s => mastered.includes(s));
+    html += `<div class="category-header">
+      <span>${cat}</span>
+      <span style="color:var(--text-dim);font-size:0.78rem">${masteredCat.length}/${inCat.length} mastered</span>
+    </div>`;
+    inCat.forEach(sh => {
+      const sc = state.scores[sh.id] || {correct:0,total:0};
+      const rate = sc.total > 0 ? Math.round(100*sc.correct/sc.total) : null;
+      const dotClass = sc.total===0 ? 'dot-gray' : rate>=80 ? 'dot-green' : rate>=50 ? 'dot-yellow' : 'dot-red';
+      html += `<div class="shortcut-row">
+        <span class="desc">${sh.desc}</span>
+        <span class="kbd">${sh.kbd}</span>
+        <span class="ratio">${sc.total > 0 ? sc.correct+'/'+sc.total : 'unseen'}</span>
+        <span class="dot ${dotClass}"></span>
+      </div>`;
+    });
+  });
+
+  document.getElementById('score-content').innerHTML = html;
+}
+
+// ════════════════════════════════════════════════════
+//  REFERENCE SCREEN
+// ════════════════════════════════════════════════════
+function renderReference() {
+  const query = (document.getElementById('ref-search')?.value || '').toLowerCase();
+  const filtered = SHORTCUTS.filter(s =>
+    !query || s.desc.toLowerCase().includes(query) || s.kbd.toLowerCase().includes(query) || s.cat.toLowerCase().includes(query)
+  );
+
+  const grouped = {};
+  filtered.forEach(s => {
+    if (!grouped[s.cat]) grouped[s.cat] = [];
+    grouped[s.cat].push(s);
+  });
+
+  let html = `<div style="color:var(--text-dim);font-size:0.82rem;margin-bottom:8px">${filtered.length} of ${SHORTCUTS.length} shortcuts</div>`;
+  Object.entries(grouped).forEach(([cat, items]) => {
+    html += `<div class="category-header">${cat} <span class="toggle">(${items.length})</span></div>`;
+    html += `<div class="ref-table">`;
+    items.forEach(s => {
+      html += `<div class="ref-item">
+        <span class="desc">${s.desc}</span>
+        <span class="ref-kbd">${s.kbd}</span>
+      </div>`;
+    });
+    html += `</div>`;
+  });
+
+  if (!filtered.length) html = `<div style="text-align:center;padding:40px;color:var(--text-dim)">No shortcuts match "${query}"</div>`;
+  document.getElementById('ref-content').innerHTML = html;
+}
+
+// ════════════════════════════════════════════════════
+//  RESET
+// ════════════════════════════════════════════════════
+function confirmReset() { document.getElementById('confirm-modal').classList.add('show'); }
+function closeModal() { document.getElementById('confirm-modal').classList.remove('show'); }
+function doReset() {
+  initState();
+  saveState();
+  closeModal();
+  updateHomeStats();
+}
+
+// ════════════════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════════════════
+loadState();
+updateHomeStats();
+</script>
+</body>
+</html>
