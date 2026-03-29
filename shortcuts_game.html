@@ -827,7 +827,7 @@ function renderQuestion() {
     btn.className = 'option-btn';
     btn.dataset.id = opt.id;
     if (q.qtype === 0) {
-      btn.innerHTML = `<span class="kbd-option">${opt.kbd}</span><br>${opt.desc}`;
+      btn.innerHTML = `<span class="kbd-option">${opt.kbd}</span>`;
     } else {
       btn.textContent = opt.desc;
     }
